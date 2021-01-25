@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
-
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -80,7 +80,9 @@ func deletebook(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	router := mux.NewRouter()
-
+	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := handlers.AllowedOrigins([]string{"*"})
 	books = append(books, Book{ID: "1", Isbn: "124", Title: "Bookone", Author: &Author{Firstname: "Gourav", Lastname: "Sharma"}})
 	books = append(books, Book{ID: "2", Isbn: "125", Title: "Booktwo", Author: &Author{Firstname: "ABC", Lastname: "DEF"}})
 	books = append(books, Book{ID: "3", Isbn: "126", Title: "Bookthree", Author: &Author{Firstname: "XYZ", Lastname: "XYZ"}})
@@ -91,5 +93,5 @@ func main() {
 	router.HandleFunc("/api/books/{id}", updatebook).Methods("PUT")
 	router.HandleFunc("/api/books/{id}", deletebook).Methods("DELETE")
 
-	http.ListenAndServe(":3000", router)
+	http.ListenAndServe(":8000", handlers.CORS(headers, methods, origins)(router))
 }
